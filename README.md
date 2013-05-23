@@ -3,7 +3,7 @@
 
 A simple script for making schroot environments from a JSON configuration file
 
-This first version isn't so smart. It assumes that you're using a 64 bit host machine, and doesn't check that you're on Debian as it should (it only uses `debootstrap` to build the chroot environment). It's probably also highly Ubuntu specific right now.
+This first version isn't so smart. It assumes that you're using a 64 bit host machine, and doesn't check that you're on Debian as it should (it only uses `debootstrap` to build the chroot environment). It's probably also highly Ubuntu specific right now. To add to the fun it's not been very thoroughly tested yet either.
 
 To use it you must install a couple of things:
 
@@ -20,12 +20,12 @@ You just need to pass mkschroot a configuration file:
 
 ### Configuring mkschroot ###
 
-The configuration file needs to be JSON. A full sample configuration might look like the below:
+The configuration file needs to be JSON. A configuration file might look like the below:
 
     {
         "root": "/mnt/files2/chroot",
         "source": "http://th.archive.ubuntu.com/ubuntu/",
-        "base-packages": ["openssh-client"],
+        "base-packages": ["lsb-release", "openssh-client"],
         "defaults": {
             "conf": {
                 "root-users": ["kirit"],
@@ -37,7 +37,7 @@ The configuration file needs to be JSON. A full sample configuration might look 
                 "release": "lucid",
                 "packages": [
                     "g++", "libbz2-dev", "libssl-dev", "python-dev", "uuid-dev",
-                    "boost-build", "libboost-all-dev"
+                    "libboost-dev", "subversion", "git-core"
                 ]
             },
             "root-ca-kirit": {
@@ -50,10 +50,11 @@ The configuration file needs to be JSON. A full sample configuration might look 
         }
     }
 
-A chroot is described by a structure like the following:
+A chroot configuration is described by a structure like the following:
 
     {
         "release": "lucid",
+        "packages": ["g++"],
         "conf": {
             "root-users": ["kirit'"],
             "users": ["kirit"]
@@ -62,6 +63,13 @@ A chroot is described by a structure like the following:
 
 * `release`: The operating system version you wish to make use of.
 * `conf`: The fields used for the schroot configuration file (in `/etc/schroot/chroot.d/`). The following fields are required: `root-users`, `users`, and the following are optional: `description`, `type`, `personality`, `directory`. Do read the part about common fields though.
+
+The other options are:
+
+* `base-packages`: Packages that are to be installed in all chroots.
+* `root`: The directory where you want the chroots to be created in by default (override this using the `directory` setting within a chroot).
+* `source`: Where the packages can be installed from.
+
 
 #### Common configuration items ####
 
