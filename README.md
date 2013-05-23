@@ -5,12 +5,18 @@ A simple script for making schroot environments from a JSON configuration file
 
 This first version isn't so smart. It assumes that you're using a 64 bit host machine, and doesn't check that you're on Debian as it should (it only uses `debootstrap` to build the chroot environment). It's probably also highly Ubuntu specific right now.
 
+To use it you must install a couple of things:
+
+    apt-get install debootstrap schroot
+    pip install mkschroot
+
 
 ## Using mkschroot ##
 
-You need to pass mkschroot a configuration file:
+You just need to pass mkschroot a configuration file:
 
     mkschroot ~/chroots/example.json
+
 
 ### Configuring mkschroot ###
 
