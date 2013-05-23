@@ -6,6 +6,10 @@ import tempfile
 
 
 PERSONALITY = 'amd64' # Assume 64 bit for now
+ARCH = { # Allow us to find the architecture from the personality name
+    'amd64': 'amd64',
+    'linux32': 'i386',
+}
 
 
 def execute(program, *args):
@@ -14,7 +18,7 @@ def execute(program, *args):
     """
     command = '%s %s' % (program, ' '.join([str(a) for a in args]))
     print "Starting", command
-    return os.system(command) == 0
+    assert os.system(command) == 0
 
 
 def sudo(program, *args):
@@ -38,15 +42,15 @@ def build_config(config, name):
                 chroot[key] = value
     copy_into(config['defaults'])
     copy_into(config['schroot'][name])
-    if not chroot.has_key('directory'):
-        chroot['directory'] = os.path.join(config['root'], name)
-    if not chroot.has_key('personality'):
-        chroot['personality'] = PERSONALITY
-    if not chroot['conf'].has_key('type'):
-        chroot['conf']['type'] = 'directory'
-    if not chroot['conf'].has_key('description'):
-        chroot['conf']['description'] = '%s %s' % (
-            chroot['release'], chroot['personality'])
+    def ensure(conf, value):
+        if not chroot['conf'].has_key(conf):
+            chroot['conf'][conf] = value
+    ensure('directory', os.path.join(config['root'], name))
+    ensure('personality', PERSONALITY)
+    ensure('type', 'directory')
+    ensure('description', '%s %s' % (
+            chroot['release'], chroot['conf']['personality']))
+    chroot['packages'] = chroot['packages'] + config['base-packages']
     return chroot
 
 
@@ -67,8 +71,15 @@ def main(json_file):
             tmp_file = tempfile.NamedTemporaryFile(delete=False)
             tmp_file.write(conf_file)
             sudo("mv", tmp_file.name, file_loc)
-        print name, chroot
-        print conf_file
+            sudo("chown", "root:root", file_loc)
+            sudo("chmod", "a+r", file_loc)
+        if not os.path.exists(chroot['conf']['directory']):
+            sudo("debootstrap", "--variant=buildd",
+                "--arch=%s" % ARCH[chroot['conf']['personality']],
+                chroot['release'], chroot['conf']['directory'],
+                config['source'])
+        execute('schroot', '-c', name, '-u', 'root', '--',
+            'apt-get', 'install', '-y', *chroot['packages'])
 
 
 if __name__ == '__main__':
