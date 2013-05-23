@@ -49,8 +49,9 @@ def build_config(config, name):
     ensure('personality', PERSONALITY)
     ensure('type', 'directory')
     ensure('description', '%s %s' % (
-            chroot['release'], chroot['conf']['personality']))
-    chroot['packages'] = chroot['packages'] + config['base-packages']
+        chroot['release'], chroot['conf']['personality']))
+    chroot['packages'] = chroot.get('packages', []) + \
+        config.get('base-packages', [])
     return chroot
 
 
