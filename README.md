@@ -18,18 +18,25 @@ The configuration file needs to be JSON. A full sample configuration might look 
 
     {
         "root": "/mnt/files2/chroot",
+        "source": "http://th.archive.ubuntu.com/ubuntu/",
+        "base-packages": ["openssh-client"],
         "defaults": {
             "conf": {
-                "root-users": ["kirit'"],
+                "root-users": ["kirit"],
                 "users": ["kirit"]
             }
         },
         "schroot": {
             "build-lucid64": {
-                "release": "lucid"
+                "release": "lucid",
+                "packages": [
+                    "g++", "libbz2-dev", "libssl-dev", "python-dev", "uuid-dev",
+                    "boost-build", "libboost-all-dev"
+                ]
             },
             "root-ca-kirit": {
                 "release": "precise",
+                "packages": ["openssl"],
                 "conf": {
                     "personality": "linux32"
                 }
