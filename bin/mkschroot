@@ -5,9 +5,9 @@ import sys
 import tempfile
 
 
-PERSONALITY = 'amd64' # Assume 64 bit for now
+PERSONALITY = 'linux64' # Assume 64 bit for now
 ARCH = { # Allow us to find the architecture from the personality name
-    'amd64': 'amd64',
+    'linux64': 'amd64',
     'linux32': 'i386',
 }
 
