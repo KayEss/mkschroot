@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+import os
+from simplejson import load
+import sys
+import tempfile
+
+
+PERSONALITY = 'linux64' # Assume 64 bit for now
+ARCH = { # Allow us to find the architecture from the personality name
+    'linux64': 'amd64',
+    'linux32': 'i386',
+}
+
+
+def execute(program, *args):
+    """
+        Execute a program and return True if it worked.
+    """
+    command = '%s %s' % (program, ' '.join([str(a) for a in args]))
+    print "Starting", command
+    assert os.system(command) == 0
+
+
+def sudo(program, *args):
+    """
+        Execute a program with sudo rights
+    """
+    return execute("sudo", program, *args)
+
+
+def build_config(config, name):
+    """
+        Build a chroot configuration by mixing the global and local configuration.
+    """
+    chroot = dict(conf={})
+    def copy_into(struct):
+        for key, value in struct.items():
+            if key == "conf":
+                for conf, choice in value.items():
+                    chroot[key][conf] = choice
+            else:
+                chroot[key] = value
+    copy_into(config['defaults'])
+    copy_into(config['schroot'][name])
+    def ensure(conf, value):
+        if not chroot['conf'].has_key(conf):
+            chroot['conf'][conf] = value
+    ensure('directory', os.path.join(config['root'], name))
+    ensure('personality', PERSONALITY)
+    ensure('type', 'directory')
+    ensure('description', '%s %s' % (
+        chroot['release'], chroot['conf']['personality']))
+    chroot['packages'] = chroot.get('packages', []) + \
+        config.get('base-packages', [])
+    return chroot
+
+
+def main(json_file):
+    config = load(file(sys.argv[1]))
+    for name in config["schroot"].keys():
+        chroot = build_config(config, name)
+        conf_file = '[%s]\n' % name
+        for conf, value in chroot['conf'].items():
+            if conf == 'personality' and value == PERSONALITY:
+                value = None
+            elif issubclass(type(value), list):
+                value = ','.join(value)
+            if value:
+                conf_file += "%s=%s\n" % (conf, value)
+        file_loc = os.path.join('/etc/schroot/chroot.d/', name)
+        if not os.path.exists(file_loc) or file(file_loc, "r").read() != conf_file:
+            tmp_file = tempfile.NamedTemporaryFile(delete=False)
+            tmp_file.write(conf_file)
+            sudo("mv", tmp_file.name, file_loc)
+            sudo("chown", "root:root", file_loc)
+            sudo("chmod", "a+r", file_loc)
+        if not os.path.exists(chroot['conf']['directory']):
+            sudo("debootstrap", "--variant=buildd",
+                "--arch=%s" % ARCH[chroot['conf']['personality']],
+                chroot['release'], chroot['conf']['directory'],
+                config['source'])
+        execute('schroot', '-c', name, '-u', 'root', '--',
+            'apt-get', 'install', '-y', *chroot['packages'])
+
+
+if __name__ == '__main__':
+    main(sys.argv[1])
