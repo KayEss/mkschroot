@@ -25,6 +25,7 @@ The configuration file needs to be JSON. A configuration file might look like th
     {
         "root": "/mnt/files2/chroot",
         "source": "http://th.archive.ubuntu.com/ubuntu/",
+        "http-proxy": "http://angelo:3142/",
         "base-packages": ["lsb-release", "openssh-client"],
         "defaults": {
             "conf": {
@@ -68,7 +69,10 @@ A chroot configuration is described by a structure like the following:
 The other options are:
 
 * `base-packages`: Packages that are to be installed in all chroots.
+* `defaults`: Default values for individual chroot configurations.
+* `http-proxy`: A HTTP proxy (probably an apt-cache) that should be used by `debootstrap` to fetch packages.
 * `root`: The directory where you want the chroots to be created in by default (override this using the `directory` setting within a chroot).
+* `schroot`: The schroot environments to be created.
 * `source`: Where the packages can be installed from.
 
 
@@ -82,3 +86,8 @@ This means that the values in the `defaults` key will be used, then any values i
 * `directory`: The `root` option will have the schroot name added to it.
 * `type`: Always `directory`.
 * `personality`: The same as the host personality (currently hard coded to 64 bits)
+
+
+#### /etc/apt/apt.conf ####
+
+If the host environment has an `/etc/apt/apt.conf` file then it is assumed that this should also be in the schroot environments. If the file content differ then the host file is copied into the schroot and `apt-get update` is run within the chroot.
