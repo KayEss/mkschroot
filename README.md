@@ -28,6 +28,9 @@ The configuration file needs to be JSON. A configuration file might look like th
         "http-proxy": "http://angelo:3142/",
         "base-packages": ["lsb-release", "openssh-client"],
         "defaults": {
+            "sources": {
+                "universe": {}
+            },
             "conf": {
                 "root-users": ["kirit"],
                 "users": ["kirit"]
@@ -56,6 +59,9 @@ A chroot configuration is described by a structure like the following:
     {
         "release": "lucid",
         "packages": ["g++"],
+        "sources": {
+            "universe": {}
+        },
         "conf": {
             "root-users": ["kirit'"],
             "users": ["kirit"]
@@ -64,6 +70,7 @@ A chroot configuration is described by a structure like the following:
 
 * `release`: The operating system version you wish to make use of.
 * `conf`: The fields used for the schroot configuration file (in `/etc/schroot/chroot.d/`). The following fields are required: `root-users`, `users`, and the following are optional: `description`, `type`, `personality`, `directory`. Do read the part about common fields though.
+* `sources`: Extra sources that are to be added to the chroot. See sources below.
 * `packages`: Packages that need to be installed into the chroot using `apt-get`. These are combined with the base-packages.
 
 The other options are:
@@ -91,3 +98,25 @@ This means that the values in the `defaults` key will be used, then any values i
 #### /etc/apt/apt.conf ####
 
 If the host environment has an `/etc/apt/apt.conf` file then it is assumed that this should also be in the schroot environments. If the file content differ then the host file is copied into the schroot and `apt-get update` is run within the chroot.
+
+
+#### Sources ####
+
+If other sources are needed then they can be specified at either the defaults level or for an individual schroot. The name is used as the component name, and this will generate a file in `/etc/apt/sources.list.d/` with the component pointing at the source. If a source field is given than that is used, otherwise the global source is used.
+
+For example:
+
+    sources: {
+        "universe": {},
+        "private-example": {"source": "http://example.com/"}
+    }
+
+Will generate two files, `universe.list`:
+
+    deb http://th.archive.ubuntu.com/ubuntu/ universe
+
+And private-example.list`:
+
+    deb http://example.com/ private-example
+
+Note that the value for a source component must be a JSON object, even if empty.

@@ -1,5 +1,6 @@
 2013-05-24  Kirit Saelensminde  <kirit@felspar.com>
- Added apt-cache compatible HTTP proxy handling and /etc/apt/apt.conf handling.
+ Added apt-cache compatible HTTP proxy handling and `/etc/apt/apt.conf` handling.
+ Allow extra sources to be added to `/etc/apt/sources.list.d`.
 
 2013-05-23  Kirit Saelensminde  <kirit@felspar.com>
  Added ChangeLog

@@ -40,10 +40,10 @@ def build_config(config, name):
     """
         Build a chroot configuration by mixing the global and local configuration.
     """
-    chroot = dict(conf={})
+    chroot = dict(conf={}, sources={})
     def copy_into(struct):
         for key, value in struct.items():
-            if key == "conf":
+            if key in ["conf", "sources"]:
                 for conf, choice in value.items():
                     chroot[key][conf] = choice
             else:
@@ -60,7 +60,23 @@ def build_config(config, name):
         chroot['release'], chroot['conf']['personality']))
     chroot['packages'] = chroot.get('packages', []) + \
         config.get('base-packages', [])
+    for source, source_conf in chroot['sources'].items():
+        if not source_conf.has_key('source'):
+            source_conf['source'] = config['source']
     return chroot
+
+
+def create_root_file(location, content):
+    """
+        Create the file at location with the requested content.
+        The file will be owned by root, but be world readable.
+    """
+    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    tmp_file.write(content)
+    tmp_file.close()
+    sudo("mv", tmp_file.name, location)
+    sudo("chown", "root:root", location)
+    sudo("chmod", "a+r", location)
 
 
 def main(json_file):
@@ -77,11 +93,7 @@ def main(json_file):
                 conf_file += "%s=%s\n" % (conf, value)
         file_loc = os.path.join('/etc/schroot/chroot.d/', name)
         if not os.path.exists(file_loc) or file(file_loc, "r").read() != conf_file:
-            tmp_file = tempfile.NamedTemporaryFile(delete=False)
-            tmp_file.write(conf_file)
-            sudo("mv", tmp_file.name, file_loc)
-            sudo("chown", "root:root", file_loc)
-            sudo("chmod", "a+r", file_loc)
+            create_root_file(file_loc, conf_file)
         if not os.path.exists(chroot['conf']['directory']):
             bootstrap = ["debootstrap", "--variant=buildd",
                 "--arch=%s" % ARCH[chroot['conf']['personality']],
@@ -94,10 +106,21 @@ def main(json_file):
         source_apt_conf = '/etc/apt/apt.conf'
         schroot_apt_conf = os.path.join(
                 chroot['conf']['directory'], 'etc/apt/apt.conf')
+        do_update = False
         if os.path.exists(source_apt_conf) and (
                 not os.path.exists(schroot_apt_conf) or
                 file(source_apt_conf).read() != file(schroot_apt_conf).read()):
             sudo('cp', source_apt_conf, schroot_apt_conf)
+            do_update = True
+        for source, location in chroot['sources'].items():
+            source_path = os.path.join(chroot['conf']['directory'],
+                'etc/apt/sources.list.d/', source +'.list')
+            if not os.path.exists(source_path):
+                create_root_file(source_path,
+                    "deb %s %s %s\n" % (location['source'],
+                        chroot['release'], source))
+                do_update = True
+        if do_update:
             schroot_sudo(name, 'apt-get', 'update')
         schroot_sudo(name, 'apt-get', 'install', '-y', *chroot['packages'])
 
