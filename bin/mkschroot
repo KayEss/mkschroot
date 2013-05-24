@@ -28,6 +28,14 @@ def sudo(program, *args):
     return execute("sudo", program, *args)
 
 
+def schroot_sudo(name, program, *args):
+    """
+        Execute the program as root in the schroot environment.
+    """
+    return execute('schroot', '-c', name, '-u', 'root', '--',
+        program, *args)
+
+
 def build_config(config, name):
     """
         Build a chroot configuration by mixing the global and local configuration.
@@ -75,12 +83,23 @@ def main(json_file):
             sudo("chown", "root:root", file_loc)
             sudo("chmod", "a+r", file_loc)
         if not os.path.exists(chroot['conf']['directory']):
-            sudo("debootstrap", "--variant=buildd",
+            bootstrap = ["debootstrap", "--variant=buildd",
                 "--arch=%s" % ARCH[chroot['conf']['personality']],
                 chroot['release'], chroot['conf']['directory'],
-                config['source'])
-        execute('schroot', '-c', name, '-u', 'root', '--',
-            'apt-get', 'install', '-y', *chroot['packages'])
+                config['source']]
+            if config.has_key('http-proxy'):
+                bootstrap = ['http_proxy="%s"' % config['http-proxy']] + \
+                    bootstrap
+            sudo(*bootstrap)
+        source_apt_conf = '/etc/apt/apt.conf'
+        schroot_apt_conf = os.path.join(
+                chroot['conf']['directory'], 'etc/apt/apt.conf')
+        if os.path.exists(source_apt_conf) and (
+                not os.path.exists(schroot_apt_conf) or
+                file(source_apt_conf).read() != file(schroot_apt_conf).read()):
+            sudo('cp', source_apt_conf, schroot_apt_conf)
+            schroot_sudo(name, 'apt-get', 'update')
+        schroot_sudo(name, 'apt-get', 'install', '-y', *chroot['packages'])
 
 
 if __name__ == '__main__':
