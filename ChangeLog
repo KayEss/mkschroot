@@ -1,2 +1,5 @@
+2013-05-24  Kirit Saelensminde  <kirit@felspar.com>
+ Added apt-cache compatible HTTP proxy handling and /etc/apt/apt.conf handling.
+
 2013-05-23  Kirit Saelensminde  <kirit@felspar.com>
  Added ChangeLog
