@@ -63,6 +63,7 @@ A chroot configuration is described by a structure like the following:
 
 * `release`: The operating system version you wish to make use of.
 * `conf`: The fields used for the schroot configuration file (in `/etc/schroot/chroot.d/`). The following fields are required: `root-users`, `users`, and the following are optional: `description`, `type`, `personality`, `directory`. Do read the part about common fields though.
+* `packages`: Packages that need to be installed into the chroot using `apt-get`. These are combined with the base-packages.
 
 The other options are:
 
