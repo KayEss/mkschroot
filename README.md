@@ -60,10 +60,20 @@ The configuration file needs to be JSON. A configuration file might look like th
         }
     }
 
+The base options are:
+
+* `base-packages`: Packages that are to be installed in all chroots.
+* `defaults`: Default values for individual chroot configurations.
+* `http-proxy`: A HTTP proxy (probably an apt-cache) that should be used by `debootstrap` to fetch packages.
+* `root`: The directory where you want the chroots to be created in by default (override this using the `directory` setting within a chroot).
+* `schroot`: The schroot environments to be created.
+* `source`: Where the packages can be installed from. This is required.
+
 A chroot configuration is described by a structure like the following:
 
     {
         "release": "lucid",
+        "variant": "buildd",
         "packages": ["g++"],
         "sources": {
             "universe": {}
@@ -75,18 +85,12 @@ A chroot configuration is described by a structure like the following:
     }
 
 * `release`: The operating system version you wish to make use of.
+* `variant`: If specified then the variant is passed to `debootstrap` so that the right base image options are used. The variant name is also used in the `schroot` configuration file so that the right start up options are used when the chroot is started. Note that some `schroot` options (notably fstab for buildd) won't work until they're configured to match your system.
 * `conf`: The fields used for the schroot configuration file (in `/etc/schroot/chroot.d/`). The following fields are required: `root-users`, `users`, and the following are optional: `description`, `type`, `personality`, `directory`. Do read the part about common fields though.
 * `sources`: Extra sources that are to be added to the chroot. See sources below.
 * `packages`: Packages that need to be installed into the chroot using `apt-get`. These are combined with the base-packages.
 
-The other options are:
-
-* `base-packages`: Packages that are to be installed in all chroots.
-* `defaults`: Default values for individual chroot configurations.
-* `http-proxy`: A HTTP proxy (probably an apt-cache) that should be used by `debootstrap` to fetch packages.
-* `root`: The directory where you want the chroots to be created in by default (override this using the `directory` setting within a chroot).
-* `schroot`: The schroot environments to be created.
-* `source`: Where the packages can be installed from.
+Note that if you change the variant of an existing image no attempt is made to correct the packages that are installed.
 
 
 #### Common configuration items ####
