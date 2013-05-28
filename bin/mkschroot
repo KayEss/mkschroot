@@ -66,7 +66,8 @@ def build_config(config, name):
             source_conf['source'] = config['source']
     if chroot.has_key("variant"):
         for setup in ['config', 'copyfiles', 'fstab', 'nssdatabases']:
-            ensure("setup.%s" % setup, "%s/%s" % (chroot['variant'], setup))
+            if os.path.exists('/etc/schroot/%s/%s' % (chroot['variant'], setup)):
+                ensure("setup.%s" % setup, "%s/%s" % (chroot['variant'], setup))
     return chroot
 
 
