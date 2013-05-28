@@ -1,2 +1,11 @@
+2013-05-27  Kirit Saelensminde  <kirit@felspar.com>
+ Images that already existed when the script is run will now have `apt-get dist-upgrade` run on them.
+ We now specify a directory within the `schroot` to use when running commands to avoid problems with running `mkschroot` from a location that doesn't exist within the chroot.
+ The variant can now be specified and alters the way that `debootstrap` is run and the way that the `schroot` is entered.
+
+2013-05-24  Kirit Saelensminde  <kirit@felspar.com>
+ Added apt-cache compatible HTTP proxy handling and `/etc/apt/apt.conf` handling.
+ Allow extra sources to be added to `/etc/apt/sources.list.d`.
+
 2013-05-23  Kirit Saelensminde  <kirit@felspar.com>
  Added ChangeLog

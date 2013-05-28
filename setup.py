@@ -10,7 +10,7 @@ def read(fname1, fname2):
 
 setup(
     name = "mkschroot",
-    version = "0.2",
+    version = "0.3",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='https://github.com/KayEss/mkschroot',
@@ -22,8 +22,10 @@ setup(
     packages = [],
     install_requires = ['simplejson'],
     classifiers = [
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Developers",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: System Administrators",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: System :: Systems Administration",
         "Programming Language :: Python",
         "License :: OSI Approved",
     ],
