@@ -108,7 +108,7 @@ def main(json_file):
             bootstrap.append(chroot['conf']['directory'])
             bootstrap.append(config['source'])
             if config.has_key('http-proxy'):
-                bootstrap.insert(0, ['http_proxy="%s"' % config['http-proxy']])
+                bootstrap.insert(0, 'http_proxy="%s"' % config['http-proxy'])
             sudo(*bootstrap)
             is_new = True
         else:
