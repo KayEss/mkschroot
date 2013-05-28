@@ -10,7 +10,7 @@ def read(fname1, fname2):
 
 setup(
     name = "mkschroot",
-    version = "0.2.4",
+    version = "0.3",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='https://github.com/KayEss/mkschroot',
