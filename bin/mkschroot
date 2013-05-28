@@ -64,6 +64,10 @@ def build_config(config, name):
     for source, source_conf in chroot['sources'].items():
         if not source_conf.has_key('source'):
             source_conf['source'] = config['source']
+    if chroot.has_key("variant"):
+        for setup in ['config', 'copyfiles', 'fstab', 'nssdatabases']:
+            chroot["conf"]["setup.%s" % setup] = \
+                "%s/%s" % (chroot['variant'], setup)
     return chroot
 
 
