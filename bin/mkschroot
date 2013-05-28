@@ -32,7 +32,8 @@ def schroot_sudo(name, program, *args):
     """
         Execute the program as root in the schroot environment.
     """
-    return execute('schroot', '-c', name, '-u', 'root', '--',
+    return execute('schroot', '--chroot', name, '--user', 'root',
+            '--directory', '/home/', '--',
         program, *args)
 
 
