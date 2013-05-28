@@ -1,7 +1,7 @@
 # mkschroot #
 
 
-A simple script for making schroot environments from a JSON configuration file
+A simple script for making `schroot` environments from a JSON configuration file. The idea is to let you set up multiple `schroot` images simply and quickly and to be able to check in the configuration that makes this repeatable across many machines easily.
 
 This first version isn't so smart. It assumes that you're using a 64 bit host machine, and doesn't check that you're on Debian as it should (it only uses `debootstrap` to build the chroot environment). It's probably also highly Ubuntu specific right now. To add to the fun it's not been very thoroughly tested yet either.
 
@@ -13,9 +13,15 @@ To use it you must install a couple of things:
 
 ## Using mkschroot ##
 
-You just need to pass mkschroot a configuration file:
+You just need to pass `mkschroot` a configuration file:
 
     mkschroot ~/chroots/example.json
+
+Don't run with root privileges. If root access is required then `sudo` rights will be requested.
+
+If the `schroot` configuration has been changed then a new configuration file will be generated. If the image doesn't exist it will be created and have the packages installed on it, if it does exist it will be updated to the latest package list and package versions.
+
+You really want to have a local `apt-cacher` if you're going to be making a lot of images.
 
 
 ### Configuring mkschroot ###

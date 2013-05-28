@@ -103,6 +103,9 @@ def main(json_file):
                 bootstrap = ['http_proxy="%s"' % config['http-proxy']] + \
                     bootstrap
             sudo(*bootstrap)
+            is_new = True
+        else:
+            is_new = False
         source_apt_conf = '/etc/apt/apt.conf'
         schroot_apt_conf = os.path.join(
                 chroot['conf']['directory'], 'etc/apt/apt.conf')
@@ -120,10 +123,14 @@ def main(json_file):
                     "deb %s %s %s\n" % (location['source'],
                         chroot['release'], source))
                 do_update = True
-        if do_update:
+        if do_update or not is_new:
             schroot_sudo(name, 'apt-get', 'update')
-        schroot_sudo(name, 'apt-get', 'install', '-y', *chroot['packages'])
+        if not is_new:
+            schroot_sudo(name, 'apt-get', 'dist-upgrade', 'y', '--auto-remove')
+        schroot_sudo(name, 'apt-get', 'install', '-y', '--auto-remove',
+            *chroot['packages'])
 
 
 if __name__ == '__main__':
     main(sys.argv[1])
+

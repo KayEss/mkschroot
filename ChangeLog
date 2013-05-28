@@ -1,3 +1,6 @@
+2013-05-27  Kirit Saelensminde  <kirit@felspar.com>
+ Images that already existed when the script is run will now have `apt-get dist-upgrade` run on them.
+
 2013-05-24  Kirit Saelensminde  <kirit@felspar.com>
  Added apt-cache compatible HTTP proxy handling and `/etc/apt/apt.conf` handling.
  Allow extra sources to be added to `/etc/apt/sources.list.d`.
