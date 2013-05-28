@@ -22,8 +22,10 @@ setup(
     packages = [],
     install_requires = ['simplejson'],
     classifiers = [
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Developers",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: System Administrators",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: System :: Systems Administration",
         "Programming Language :: Python",
         "License :: OSI Approved",
     ],
