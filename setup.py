@@ -10,7 +10,7 @@ def read(fname1, fname2):
 
 setup(
     name = "mkschroot",
-    version = "0.3.2.2",
+    version = "0.3.2.5",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='https://github.com/KayEss/mkschroot',
@@ -19,7 +19,7 @@ setup(
     license = "Boost Software License - Version 1.0 - August 17th, 2003",
     keywords = "chroot debian devops",
     scripts = ['bin/mkschroot'],
-    packages = [],
+    packages = ['mkschroot'],
     install_requires = ['simplejson'],
     classifiers = [
         "Development Status :: 4 - Beta",
