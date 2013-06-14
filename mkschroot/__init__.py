@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 
 PERSONALITY = 'linux64' # Assume 64 bit for now

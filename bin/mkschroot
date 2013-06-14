@@ -2,7 +2,6 @@
 import os
 from simplejson import load
 import sys
-import tempfile
 
 from mkschroot import build_from_config
     
