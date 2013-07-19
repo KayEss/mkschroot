@@ -37,4 +37,3 @@ def current_user():
     """
     return os.environ["USER"]
 
-
