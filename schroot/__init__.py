@@ -1,7 +1,5 @@
 import os
 
-from chroot import Schroot
-
 
 def execute(program, *args):
     """
@@ -17,4 +15,17 @@ def sudo(program, *args):
         Execute a program with sudo rights
     """
     return execute("sudo", program, *args)
+
+
+def create_root_file(location, content):
+    """
+        Create the file at location with the requested content.
+        The file will be owned by root, but be world readable.
+    """
+    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    tmp_file.write(content)
+    tmp_file.close()
+    sudo("mv", tmp_file.name, location)
+    sudo("chown", "root:root", location)
+    sudo("chmod", "a+r", location)
 

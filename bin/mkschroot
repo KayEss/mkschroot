@@ -4,14 +4,8 @@ from simplejson import load
 import sys
 import tempfile
 
-from schroot import execute, sudo, Schroot
-
-
-PERSONALITY = 'linux64' # Assume 64 bit for now
-ARCH = { # Allow us to find the architecture from the personality name
-    'linux64': 'amd64',
-    'linux32': 'i386',
-}
+from schroot import execute, sudo
+from schroot.chroot import PERSONALITY, Schroot
 
 
 def schroot_sudo(name, program, *args):
@@ -23,68 +17,11 @@ def schroot_sudo(name, program, *args):
         program, *args)
 
 
-def build_config(config, name):
-    """
-        Build a chroot configuration by mixing the global and local configuration.
-    """
-    chroot = dict(conf={}, sources={})
-    def copy_into(struct):
-        for key, value in struct.items():
-            if key in ["conf", "sources"]:
-                for conf, choice in value.items():
-                    chroot[key][conf] = choice
-            else:
-                chroot[key] = value
-    copy_into(config['defaults'])
-    copy_into(config['schroot'][name])
-    def ensure(conf, value):
-        if not chroot['conf'].has_key(conf):
-            chroot['conf'][conf] = value
-    ensure('directory', os.path.join(config['root'], name))
-    ensure('personality', PERSONALITY)
-    ensure('type', 'directory')
-    ensure('description', '%s %s' % (
-        chroot['release'], chroot['conf']['personality']))
-    chroot['packages'] = chroot.get('packages', []) + \
-        config.get('base-packages', [])
-    for source, source_conf in chroot['sources'].items():
-        if not source_conf.has_key('source'):
-            source_conf['source'] = config['source']
-    if chroot.has_key("variant"):
-        for setup in ['config', 'copyfiles', 'fstab', 'nssdatabases']:
-            if os.path.exists('/etc/schroot/%s/%s' % (chroot['variant'], setup)):
-                ensure("setup.%s" % setup, "%s/%s" % (chroot['variant'], setup))
-    return chroot
-
-
-def create_root_file(location, content):
-    """
-        Create the file at location with the requested content.
-        The file will be owned by root, but be world readable.
-    """
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
-    tmp_file.write(content)
-    tmp_file.close()
-    sudo("mv", tmp_file.name, location)
-    sudo("chown", "root:root", location)
-    sudo("chmod", "a+r", location)
-
-
 def main(json_file):
     config = load(file(sys.argv[1]))
     for name in config["schroot"].keys():
-        chroot = build_config(config, name)
-        conf_file = '[%s]\n' % name
-        for conf, value in chroot['conf'].items():
-            if conf == 'personality' and value == PERSONALITY:
-                value = None
-            elif issubclass(type(value), list):
-                value = ','.join(value)
-            if value:
-                conf_file += "%s=%s\n" % (conf, value)
-        file_loc = os.path.join('/etc/schroot/chroot.d/', name)
-        if not os.path.exists(file_loc) or file(file_loc, "r").read() != conf_file:
-            create_root_file(file_loc, conf_file)
+        chroot = Schroot(config, name)
+        chroot.update_conf_file()
         if not os.path.exists(chroot['conf']['directory']):
             bootstrap = ["debootstrap"]
             if chroot.has_key('variant'):
