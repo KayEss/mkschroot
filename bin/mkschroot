@@ -4,8 +4,7 @@ from simplejson import load
 import sys
 import tempfile
 
-from schroot import execute, sudo
-from schroot.chroot import PERSONALITY, Schroot
+from schroot.chroot import Schroot
 
 
 def main(json_file):
