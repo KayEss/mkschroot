@@ -1,6 +1,6 @@
 import os
 
-from mkschroot import create_root_file, execute
+from mkschroot import create_root_file, execute, sudo
 
 
 PERSONALITY = 'linux64' # Assume 64 bit for now
@@ -11,12 +11,14 @@ ARCH = { # Allow us to find the architecture from the personality name
 
 
 class Schroot(dict):
-    def __init__(self, config, name):
+    def __init__(self, config, name, source, http_proxy):
         """
             Build a chroot configuration by mixing the global and local configuration.
         """
         super(Schroot, self).__init__(conf={}, sources={})
         self.name = name
+        self.source = source
+        self.http_proxy = http_proxy
         def copy_into(struct):
             for key, value in struct.items():
                 if key in ["conf", "sources"]:
@@ -67,9 +69,9 @@ class Schroot(dict):
             bootstrap.append("--arch=%s" % ARCH[self['conf']['personality']])
             bootstrap.append(self['release'])
             bootstrap.append(self['conf']['directory'])
-            bootstrap.append(self['source'])
-            if config.has_key('http-proxy'):
-                bootstrap.insert(0, 'http_proxy="%s"' % config['http-proxy'])
+            bootstrap.append(self.source)
+            if self.http_proxy:
+                bootstrap.insert(0, 'http_proxy="%s"' % self.http_proxy)
             sudo(*bootstrap)
             is_new = True
         else:

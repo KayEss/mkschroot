@@ -8,7 +8,7 @@ from mkschroot.chroot import Schroot
 def main(json_file):
     config = load(file(sys.argv[1]))
     for name in config["schroot"].keys():
-        chroot = Schroot(config, name)
+        chroot = Schroot(config, name, config['source'], config.get('http-proxy', None))
         chroot.update_conf_file()
         chroot.update_packages()
 
