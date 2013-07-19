@@ -50,6 +50,9 @@ class Schroot(dict):
 
 
     def update_conf_file(self):
+        """
+            Ensure that the schroot configuration file is correct.
+        """
         conf_file = '[%s]\n' % self.name
         for conf, value in self['conf'].items():
             if conf == 'personality' and value == PERSONALITY:
@@ -64,6 +67,9 @@ class Schroot(dict):
 
 
     def update_packages(self):
+        """
+            Ensure that the schroot is properly built and has the latest packages.
+        """
         if not os.path.exists(self['conf']['directory']):
             bootstrap = ["debootstrap"]
             if self.has_key('variant'):
