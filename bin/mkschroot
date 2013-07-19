@@ -4,7 +4,7 @@ from simplejson import load
 import sys
 import tempfile
 
-from schroot.chroot import Schroot
+from mkschroot.chroot import Schroot
 
 
 def main(json_file):

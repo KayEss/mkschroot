@@ -1,6 +1,6 @@
 import os
 
-from schroot import create_root_file, execute
+from mkschroot import create_root_file, execute
 
 
 PERSONALITY = 'linux64' # Assume 64 bit for now
