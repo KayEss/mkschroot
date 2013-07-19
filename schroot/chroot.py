@@ -1,0 +1,5 @@
+
+
+class Schroot(object):
+    pass
+

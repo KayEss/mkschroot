@@ -4,28 +4,14 @@ from simplejson import load
 import sys
 import tempfile
 
+from schroot import execute, sudo, Schroot
+
 
 PERSONALITY = 'linux64' # Assume 64 bit for now
 ARCH = { # Allow us to find the architecture from the personality name
     'linux64': 'amd64',
     'linux32': 'i386',
 }
-
-
-def execute(program, *args):
-    """
-        Execute a program and return True if it worked.
-    """
-    command = '%s %s' % (program, ' '.join([str(a) for a in args]))
-    print "Starting", command
-    assert os.system(command) == 0
-
-
-def sudo(program, *args):
-    """
-        Execute a program with sudo rights
-    """
-    return execute("sudo", program, *args)
 
 
 def schroot_sudo(name, program, *args):
