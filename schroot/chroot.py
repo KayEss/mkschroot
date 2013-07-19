@@ -1,6 +1,6 @@
 import os
 
-from schroot import create_root_file
+from schroot import create_root_file, execute
 
 
 PERSONALITY = 'linux64' # Assume 64 bit for now
@@ -57,4 +57,52 @@ class Schroot(dict):
         file_loc = os.path.join('/etc/schroot/chroot.d/', self.name)
         if not os.path.exists(file_loc) or file(file_loc, "r").read() != conf_file:
             create_root_file(file_loc, conf_file)
+
+
+    def update_packages(self):
+        if not os.path.exists(self['conf']['directory']):
+            bootstrap = ["debootstrap"]
+            if self.has_key('variant'):
+                bootstrap.append("--variant=%s" % self["variant"])
+            bootstrap.append("--arch=%s" % ARCH[self['conf']['personality']])
+            bootstrap.append(self['release'])
+            bootstrap.append(self['conf']['directory'])
+            bootstrap.append(self['source'])
+            if config.has_key('http-proxy'):
+                bootstrap.insert(0, 'http_proxy="%s"' % config['http-proxy'])
+            sudo(*bootstrap)
+            is_new = True
+        else:
+            is_new = False
+        source_apt_conf = '/etc/apt/apt.conf'
+        schroot_apt_conf = os.path.join(
+                self['conf']['directory'], 'etc/apt/apt.conf')
+        do_update = False
+        if os.path.exists(source_apt_conf) and (
+                not os.path.exists(schroot_apt_conf) or
+                file(source_apt_conf).read() != file(schroot_apt_conf).read()):
+            sudo('cp', source_apt_conf, schroot_apt_conf)
+            do_update = True
+        for source, location in self['sources'].items():
+            source_path = os.path.join(self['conf']['directory'],
+                'etc/apt/sources.list.d/', source +'.list')
+            if not os.path.exists(source_path):
+                create_root_file(source_path,
+                    "deb %s %s %s\n" % (location['source'],
+                        self['release'], source))
+                do_update = True
+        if do_update or not is_new:
+            self.sudo('apt-get', 'update')
+        if not is_new:
+            self.sudo('apt-get', 'dist-upgrade', '-y', '--auto-remove')
+        self.sudo('apt-get', 'install', '-y', '--auto-remove',
+            *self['packages'])
+
+
+    def sudo(self, program, *args):
+        """
+            Execute the program as root in the schroot environment.
+        """
+        return execute('schroot', '--chroot', self.name, '--user', 'root',
+                '--directory', '/home/', '--', program, *args)
 
