@@ -1,6 +1,6 @@
 import os
 
-from mkschroot import create_root_file, execute, sudo
+from mkschroot import create_root_file, current_user,  execute, sudo
 
 
 PERSONALITY = 'linux64' # Assume 64 bit for now
@@ -36,6 +36,8 @@ class Schroot(dict):
         ensure('type', 'directory')
         ensure('description', '%s %s' % (
             self['release'], self['conf']['personality']))
+        ensure('root-users', [current_user()])
+        ensure('users', [current_user()])
         self['packages'] = self.get('packages', []) + \
             self.get('base-packages', [])
         for source, source_conf in self['sources'].items():

@@ -30,3 +30,11 @@ def create_root_file(location, content):
     sudo("chown", "root:root", location)
     sudo("chmod", "a+r", location)
 
+
+def current_user():
+    """
+        Return the name of the currently logged in user.
+    """
+    return os.environ["USER"]
+
+
