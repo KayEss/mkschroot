@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from mkschroot import create_root_file, current_user,  execute, sudo
 
@@ -8,6 +9,15 @@ ARCH = { # Allow us to find the architecture from the personality name
     'linux64': 'amd64',
     'linux32': 'i386',
 }
+
+
+def load_schroots(config):
+    schroots = []
+    for name in config["schroot"].keys():
+        chroot = Schroot(config, name, config['source'],
+            config.get('http-proxy', None))
+        schroots.append(chroot)
+    return schroots
 
 
 class Schroot(dict):
@@ -47,6 +57,21 @@ class Schroot(dict):
             for setup in ['config', 'copyfiles', 'fstab', 'nssdatabases']:
                 if os.path.exists('/etc/schroot/%s/%s' % (self['variant'], setup)):
                     ensure("setup.%s" % setup, "%s/%s" % (self['variant'], setup))
+
+
+    def chroot_path(self, path):
+        """
+            Return a path within the chroot given a root relative path.
+        """
+        return os.path.join(self['conf']['directory'], path)
+
+
+    def schroot(self, program, directory='/'):
+        """
+            Execute the program within the schroot.
+        """
+        return subprocess.check_call(
+            ['schroot', '--chroot', self.name, '--directory', directory, '--'] + program)
 
 
     def update_conf_file(self):

@@ -2,13 +2,13 @@
 from simplejson import load
 import sys
 
-from mkschroot.chroot import Schroot
+from mkschroot.chroot import load_schroots, Schroot
 
 
 def main(json_file):
     config = load(file(sys.argv[1]))
-    for name in config["schroot"].keys():
-        chroot = Schroot(config, name, config['source'], config.get('http-proxy', None))
+    schroots = load_schroots(config)
+    for chroot in schroots:
         chroot.update_conf_file()
         chroot.update_packages()
 
