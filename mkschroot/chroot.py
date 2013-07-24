@@ -66,7 +66,7 @@ class Schroot(dict):
         return os.path.join(self['conf']['directory'], path)
 
 
-    def schroot(self, program, directory='/'):
+    def check_call(self, program, directory='/'):
         """
             Execute the program within the schroot.
         """
