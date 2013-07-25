@@ -11,15 +11,6 @@ ARCH = { # Allow us to find the architecture from the personality name
 }
 
 
-def load_schroots(config):
-    schroots = []
-    for name in config["schroot"].keys():
-        chroot = Schroot(config, name, config['source'],
-            config.get('http-proxy', None))
-        schroots.append(chroot)
-    return schroots
-
-
 class Schroot(dict):
     def __init__(self, config, name, source, http_proxy):
         """
@@ -141,3 +132,16 @@ class Schroot(dict):
         return execute('schroot', '--chroot', self.name, '--user', 'root',
                 '--directory', '/home/', '--', program, *args)
 
+
+
+def load_schroots(config, kls=Schroot):
+    """
+        Builds the schroots indicated in the configuration file. A list of
+        schroot instances will be returned of the type specified.
+    """
+    schroots = []
+    for name in config["schroot"].keys():
+        chroot = kls(config, name, config['source'],
+            config.get('http-proxy', None))
+        schroots.append(chroot)
+    return schroots
