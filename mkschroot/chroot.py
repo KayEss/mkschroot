@@ -65,6 +65,15 @@ class Schroot(dict):
             ['schroot', '--chroot', self.name, '--directory', directory, '--'] + program)
 
 
+    def sudo(self, program, directory='/home/'):
+        """
+            Execute the program as root in the schroot environment.
+        """
+        return subprocess.check_call(
+            ['schroot', '--chroot', self.name, '--user', 'root',
+                '--directory', directory, '--'] + program)
+
+
     def update_conf_file(self):
         """
             Ensure that the schroot configuration file is correct.
@@ -118,20 +127,11 @@ class Schroot(dict):
                         self['release'], source))
                 do_update = True
         if do_update or not is_new:
-            self.sudo('apt-get', 'update')
+            self.sudo(['apt-get', 'update'])
         if not is_new:
-            self.sudo('apt-get', 'dist-upgrade', '-y', '--auto-remove')
-        self.sudo('apt-get', 'install', '-y', '--auto-remove',
-            *self['packages'])
-
-
-    def sudo(self, program, *args):
-        """
-            Execute the program as root in the schroot environment.
-        """
-        return execute('schroot', '--chroot', self.name, '--user', 'root',
-                '--directory', '/home/', '--', program, *args)
-
+            self.sudo(['apt-get', 'dist-upgrade', '-y', '--auto-remove'])
+        self.sudo(['apt-get', 'install', '-y', '--auto-remove'] +
+                  self['packages'])
 
 
 def load_schroots(config, kls=Schroot):
