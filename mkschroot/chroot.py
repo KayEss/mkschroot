@@ -11,6 +11,18 @@ ARCH = { # Allow us to find the architecture from the personality name
 }
 
 
+def _caller(caller):
+    """
+        Decorator to allow us to print the command we're running
+    """
+    def call(command, **opts):
+        print ' '.join(command)
+        if opts:
+            print opts
+        return caller(command, **opts)
+    return call
+
+
 class Schroot(dict):
     def __init__(self, config, name, source, http_proxy):
         """
@@ -57,19 +69,19 @@ class Schroot(dict):
         return os.path.join(self['conf']['directory'], path)
 
 
-    def check_call(self, program, directory='/'):
+    def check_call(self, program, directory='/', caller=subprocess.check_call):
         """
             Execute the program within the schroot.
         """
-        return subprocess.check_call(
+        return (_caller(caller))(
             ['schroot', '--chroot', self.name, '--directory', directory, '--'] + program)
 
 
-    def sudo(self, program, directory='/home/'):
+    def sudo(self, program, directory='/home/', caller=subprocess.check_call):
         """
             Execute the program as root in the schroot environment.
         """
-        return subprocess.check_call(
+        return (_caller(caller))(
             ['schroot', '--chroot', self.name, '--user', 'root',
                 '--directory', directory, '--'] + program)
 
