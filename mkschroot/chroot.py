@@ -107,7 +107,9 @@ class Schroot(dict):
         """
             Ensure that the schroot is properly built and has the latest packages.
         """
-        if not os.path.exists(self['conf']['directory']):
+
+        # If /etc/ isn't in the VM then we don't have a proper install yet
+        if not os.path.exists(os.path.join(self['conf']['directory'], 'etc/')):
             bootstrap = ["debootstrap"]
             if self.has_key('variant'):
                 bootstrap.append("--variant=%s" % self["variant"])
@@ -121,15 +123,18 @@ class Schroot(dict):
             is_new = True
         else:
             is_new = False
+
         source_apt_conf = '/etc/apt/apt.conf'
         schroot_apt_conf = os.path.join(
                 self['conf']['directory'], 'etc/apt/apt.conf')
+
         do_update = False
         if os.path.exists(source_apt_conf) and (
                 not os.path.exists(schroot_apt_conf) or
                 file(source_apt_conf).read() != file(schroot_apt_conf).read()):
             sudo('cp', source_apt_conf, schroot_apt_conf)
             do_update = True
+
         for source, location in self['sources'].items():
             source_path = os.path.join(self['conf']['directory'],
                 'etc/apt/sources.list.d/', source +'.list')
@@ -138,6 +143,7 @@ class Schroot(dict):
                     "deb %s %s %s\n" % (location['source'],
                         self['release'], source))
                 do_update = True
+
         if do_update or not is_new:
             self.sudo(['apt-get', 'update'])
         if not is_new:

@@ -10,12 +10,12 @@ def read(fname1, fname2):
 
 setup(
     name = "mkschroot",
-    version = "0.3.3.1",
+    version = "0.3.3.2",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='https://github.com/KayEss/mkschroot',
     description = ("A simple script for making schroot environments from a JSON configuration file"),
-    long_description = read('README','README.md'),
+    long_description = read('README', 'README.md'),
     license = "Boost Software License - Version 1.0 - August 17th, 2003",
     keywords = "chroot debian devops",
     scripts = ['bin/mkschroot'],
