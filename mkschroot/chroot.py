@@ -24,7 +24,7 @@ def _caller(caller):
 
 
 class Schroot(dict):
-    def __init__(self, config, name, source, http_proxy):
+    def __init__(self, config, name, source, base_packages, http_proxy):
         """
             Build a chroot configuration by mixing the global and local configuration.
         """
@@ -51,8 +51,7 @@ class Schroot(dict):
             self['release'], self['conf']['personality']))
         ensure('root-users', [current_user()])
         ensure('users', [current_user()])
-        self['packages'] = self.get('packages', []) + \
-            self.get('base-packages', [])
+        self['packages'] = self.get('packages', []) + base_packages
         for source, source_conf in self['sources'].items():
             if not source_conf.has_key('source'):
                 source_conf['source'] = config['source']
@@ -160,6 +159,7 @@ def load_schroots(config, kls=Schroot):
     schroots = []
     for name in config["schroot"].keys():
         chroot = kls(config, name, config['source'],
+            config.get('base-packages', []),
             config.get('http-proxy', None))
         schroots.append(chroot)
     return schroots

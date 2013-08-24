@@ -1,3 +1,6 @@
+2013-08-24  Kirit Saelensminde  <kirit@felspar.com>
+ Fix a bug causing the base packages to not be installed.
+
 2013-08-23  Kirit Saelensminde  <kirit@felspar.com>
  Look for /etc/ in the chroot to determine if we should use debootstrap or not.
 
